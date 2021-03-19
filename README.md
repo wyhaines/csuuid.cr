@@ -1,6 +1,6 @@
 # CSSUID
 
-![CSUUID CI](https://img.shields.io/github/workflow/status/wyhaines/CSUUID.cr/ParseDate%20CI?style=for-the-badge&logo=GitHub)
+![CSUUID CI](https://img.shields.io/github/workflow/status/wyhaines/CSUUID.cr/CSUUID.cr%20CI?style=for-the-badge&logo=GitHub)
 [![GitHub release](https://img.shields.io/github/release/wyhaines/CSUUID.cr.svg?style=for-the-badge)](https://github.com/wyhaines/CSUUID.cr/releases)
 ![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/wyhaines/CSUUID.cr/latest?style=for-the-badge)
 
