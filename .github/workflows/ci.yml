@@ -1,4 +1,4 @@
-name: Git-Index CI
+name: CSUUID.cr CI
 
 on:
   schedule:
