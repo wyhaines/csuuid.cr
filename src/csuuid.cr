@@ -31,15 +31,19 @@ require "random/isaac"
     # The current implementation chose option #2, as it is less work to generate
     # a UUID if math is not involved.
     #
+    # ```plain
     # +-------------+-----------------+------------+
     # | nanoseconds |     seconds     | identifier |
     # |    0..3     |      4..10      |   11..15   |
     # +-------------+-----------------+------------+
+    # ```
     #
     struct CSUUID
       @@prng = Random::ISAAC.new
       @@string_matcher = /^(........)-(....)-(....)-(....)-(............)/
+      # :nodoc:
       class_property identifier
+      # :nodoc:
       class_property extra
 
       @bytes : Slice(UInt8) = Slice(UInt8).new(16)
@@ -60,7 +64,16 @@ require "random/isaac"
         initialize_impl(seconds, nanoseconds, identifier)
       end
 
-      def initialize_impl(seconds : Int64, nanoseconds : Int32, identifier : Slice(UInt8) | String | Nil)
+      def initialize(timestamp : Time, identifier : Slice(UInt8) | String | Nil = nil)
+        initialize_impl(timestamp.internal_seconds, timestamp.internal_nanoseconds, identifier)
+      end
+
+      def initialize(identifier : Slice(UInt8) | String | Nil = nil)
+        t = Time.local
+        initialize_impl(t.internal_seconds, t.internal_nanoseconds, identifier)
+      end
+
+      private def initialize_impl(seconds : Int64, nanoseconds : Int32, identifier : Slice(UInt8) | String | Nil)
         id = if identifier.is_a?(String)
                buf = Slice(UInt8).new(6)
                number_of_bytes = identifier.size < 6 ? identifier.size : 6
@@ -75,15 +88,8 @@ require "random/isaac"
         @bytes[10, 6].copy_from(id || @@prng.random_bytes(6))
       end
 
-      def initialize(timestamp : Time, identifier : Slice(UInt8) | String | Nil = nil)
-        initialize_impl(timestamp.internal_seconds, timestamp.internal_nanoseconds, identifier)
-      end
-
-      def initialize(identifier : Slice(UInt8) | String | Nil = nil)
-        t = Time.local
-        initialize_impl(t.internal_seconds, t.internal_nanoseconds, identifier)
-      end
-
+      # This returns a tuple containing the seconds since the epoch as well
+      # as the nanoseconds in the current second for the UUID.
       def seconds_and_nanoseconds : Tuple(Int64, Int32)
         sns = @seconds_and_nanoseconds
         return sns if !sns.nil?
@@ -96,19 +102,24 @@ require "random/isaac"
         }
       end
 
-      def timestamp
-        return @timestamp if @timestamp
+      # Return a Time object representing the timestamp encoded into the UUID as local time.
+      def timestamp : Time
+        ts = @timestamp
+        return ts unless ts.nil?
         sns = seconds_and_nanoseconds
         @timestamp = Time.new(seconds: sns[0], nanoseconds: sns[1], location: @location)
       end
 
-      def utc
-        return @utc if @utc
+      # Return a Time object representing the timestamp encoded into the UUID as UTC time.
+      def utc : Time
+        u = @utc
+        return u unless u.nil?
         sns = seconds_and_nanoseconds
         @utc = Time.utc(seconds: sns[0], nanoseconds: sns[1])
       end
 
-      def to_s
+      # Return the String representation of the UUID.
+      def to_s : String
         hs = @bytes.hexstring
         "#{hs[0..7]}-#{hs[8..11]}-#{hs[12..15]}-#{hs[16..19]}-#{hs[20..31]}"
       end
