@@ -17,12 +17,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Install sudo package
-      run: apt update && apt install sudo
-    - name: Install SQLite3
-      run: |
-        sudo apt update
-        sudo apt-get install -y sqlite3 libsqlite3-dev
     - name: Install dependencies
       run: shards install
     - name: Run tests
