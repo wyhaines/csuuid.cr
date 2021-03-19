@@ -5,11 +5,13 @@
 
 struct Time
   @[AlwaysInline]
+  # Return the number of seconds since the epoch for this Time instance.
   def internal_seconds
     @seconds
   end
 
   @[AlwaysInline]
+  # Return the number of nanoseconds in the current second for this Time instance.
   def internal_nanoseconds
     @nanoseconds
   end
