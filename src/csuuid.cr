@@ -39,6 +39,8 @@ require "random/isaac"
     # ```
     #
     struct CSUUID
+      VERSION = "0.1.1"
+
       @@prng = Random::ISAAC.new
       @@string_matcher = /^(........)-(....)-(....)-(....)-(............)/
       # :nodoc:
