@@ -1,7 +1,7 @@
 require "uuid"
 require "./time"
 require "random/isaac"
-require "mutex"
+require "crystal/spin_lock"
 
 # This struct wraps up a UUID that encodes a timestamp measured as seconds
 # from the epoch (0001-01-01 00:00:00.0 UTC) observed at the location where
@@ -42,7 +42,8 @@ require "mutex"
 struct CSUUID
   VERSION = "0.1.1"
 
-  @@mutex = Mutex.new(protection: Mutex::Protection::Reentrant)
+  @@mutex = Crystal::SpinLock.new
+  # @@mutex = Mutex.new(protection: Mutex::Protection::Reentrant)
   @@prng = Random::ISAAC.new
   @@string_matcher = /^(........)-(....)-(....)-(....)-(............)/
   # :nodoc:
@@ -89,8 +90,10 @@ struct CSUUID
 
     IO::ByteFormat::BigEndian.encode(seconds, @bytes[2, 8])
     IO::ByteFormat::BigEndian.encode(nanoseconds, @bytes[0, 4])
-    @@mutex.synchronize do
-      # Suspicion that the ISAAC implementation isn't threadsafe
+    @@mutex.sync do
+      # Random::ISAAC.random_bytes doesn't appear to be threadsafe.
+      # It sometimes dies ugly in multithreaded code, so we need a
+      # lock in this one tiny little space to avoid that.
       @bytes[10, 6].copy_from(id || @@prng.random_bytes(6))
     end
   end
