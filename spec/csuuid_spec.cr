@@ -1,6 +1,5 @@
 require "./spec_helper"
 
-
 CHECKUUID = /^(........)-(....)-(....)-(....)-(............)/
 
 describe CSUUID do
