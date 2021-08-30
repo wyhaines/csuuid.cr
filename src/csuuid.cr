@@ -74,6 +74,7 @@ struct CSUUID
   end
 
   def initialize(identifier : Slice(UInt8) | String | Nil = nil)
+    identifier ||= @@prng.random_bytes(6)
     t = Time.local
     initialize_impl(t.internal_seconds, t.internal_nanoseconds, identifier)
   end

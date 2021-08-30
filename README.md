@@ -48,6 +48,8 @@ uuid = CSUUID.new
 
 uuid = CSUUID.new(seconds: 9223372036, nanoseconds: 729262400)
 
+uuid = CSUUID.new(identifier: Random.new.random_bytes(6))
+
 dt = ParseDate.parse("2020/07/29 09:15:37")
 uuid = CSUUID.new(dt)
 ```

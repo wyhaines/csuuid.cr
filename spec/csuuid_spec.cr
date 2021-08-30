@@ -45,6 +45,25 @@ describe CSUUID do
     uuid.to_s.should match /-79f659ccb685/
   end
 
+  it "generates a UUID with a random identifier" do
+    random_bytes = Random.new.random_bytes(6)
+    uuid = CSUUID.new(identifier: random_bytes)
+    uuid.to_s.should match /-#{random_bytes.hexstring}/
+  end
+
+  it "generates a UUID with the current time, but a random identifier, if initialized with no input" do
+    uuid1 = CSUUID.new
+    sleep 1.1
+    uuid2 = CSUUID.new
+
+    match_1 = CHECKUUID.match(uuid1.to_s)
+    match_1.should_not be_nil
+    match_2 = CHECKUUID.match(uuid2.to_s)
+    match_2.should_not be_nil
+    match_1.to_s.should_not eq match_2.to_s
+    (!match_1.nil?) && (!match_2.nil?) && match_1[5].should_not eq match_2[5]
+  end
+
   it "accurately returns the seconds and nanoseconds encoded within the UUID" do
     uuid = CSUUID.new(seconds: 9223372036, nanoseconds: 729262400)
     uuid.seconds_and_nanoseconds.should eq({9223372036, 729262400})
