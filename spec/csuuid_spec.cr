@@ -75,4 +75,15 @@ describe CSUUID do
       ParseDate.parse("2020/07/29 09:15:37").not_nil!.in(Time::Location.local)
     )
   end
+
+  it "can produce two unique CSUUIDs consecutively" do
+    uuid1 = CSUUID.unique
+    uuid2 = CSUUID.unique
+    uuid1.should_not eq uuid2
+  end
+
+  it "can generate a long sequence of unique CSUUIDs" do
+    uuids = CSUUID.generate(10000)
+    uuids.uniq.size.should eq uuids.size
+  end
 end

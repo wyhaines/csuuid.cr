@@ -40,22 +40,56 @@ require "crystal/spin_lock"
 # ```
 #
 struct CSUUID
-  VERSION = "0.1.1"
+  VERSION = "0.2.0"
 
   @@mutex = Crystal::SpinLock.new
   # @@mutex = Mutex.new(protection: Mutex::Protection::Reentrant)
   @@prng = Random::ISAAC.new
   @@string_matcher = /^(........)-(....)-(....)-(....)-(............)/
-  # :nodoc:
-  class_property identifier
-  # :nodoc:
-  class_property extra
+  @@unique_identifier : Slice(UInt8) = Slice(UInt8).new(6, 0)
+  @@unique_seconds_and_nanoseconds : Tuple(Int64, Int32) = {0_i64, 0_i32}
 
   @bytes : Slice(UInt8) = Slice(UInt8).new(16)
   @seconds_and_nanoseconds : Tuple(Int64, Int32)?
   @timestamp : Time?
   @utc : Time?
   @location : Time::Location = Time::Location.local
+
+  def self.unique
+    @@mutex.sync do
+      t = Time.local
+      if t.internal_nanoseconds == @@unique_seconds_and_nanoseconds[1] &&
+         t.internal_seconds == @@unique_seconds_and_nanoseconds[0]
+        increment_unique_identifier
+      else
+        @@unique_seconds_and_nanoseconds = {t.internal_seconds, t.internal_nanoseconds}
+        @@unique_identifier = @@prng.random_bytes(6)
+      end
+
+      new(
+        @@unique_seconds_and_nanoseconds[0],
+        @@unique_seconds_and_nanoseconds[1],
+        @@unique_identifier
+      )
+    end
+  end
+
+  def self.generate(count)
+    result = [] of CSUUID
+    count.times {result << unique}
+
+    result
+  end
+
+  # :nodoc:
+  def self.increment_unique_identifier
+    5.downto(0) do |position|
+      new_byte_value = @@unique_identifier[position] &+= 1
+      break unless new_byte_value == 0
+    end
+
+    @@unique_identifier
+  end
 
   def initialize(uuid : String)
     @bytes = uuid.tr("-", "").hexbytes
@@ -81,13 +115,13 @@ struct CSUUID
 
   private def initialize_impl(seconds : Int64, nanoseconds : Int32, identifier : Slice(UInt8) | String | Nil)
     id = if identifier.is_a?(String)
-           buf = Slice(UInt8).new(6)
-           number_of_bytes = identifier.size < 6 ? identifier.size : 6
-           buf[0, number_of_bytes].copy_from(identifier.hexbytes[0, number_of_bytes])
-           buf
-         else
-           identifier
-         end
+      buf = Slice(UInt8).new(6)
+      number_of_bytes = identifier.size < 6 ? identifier.size : 6
+      buf[0, number_of_bytes].copy_from(identifier.hexbytes[0, number_of_bytes])
+      buf
+    else
+      identifier
+    end
 
     IO::ByteFormat::BigEndian.encode(seconds, @bytes[2, 8])
     IO::ByteFormat::BigEndian.encode(nanoseconds, @bytes[0, 4])
