@@ -40,7 +40,7 @@ require "crystal/spin_lock"
 # ```
 #
 struct CSUUID
-  VERSION = "0.2.0"
+  VERSION = "0.2.1"
 
   @@mutex = Crystal::SpinLock.new
   # @@mutex = Mutex.new(protection: Mutex::Protection::Reentrant)
