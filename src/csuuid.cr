@@ -1,5 +1,5 @@
 require "uuid"
-require "./time"
+require "time-ext"
 require "random/isaac"
 require "crystal/spin_lock"
 
@@ -40,7 +40,7 @@ require "crystal/spin_lock"
 # ```
 #
 struct CSUUID
-  VERSION = "0.2.1"
+  VERSION = "0.2.2"
 
   @@mutex = Crystal::SpinLock.new
   # @@mutex = Mutex.new(protection: Mutex::Protection::Reentrant)

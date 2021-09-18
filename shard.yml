@@ -1,5 +1,5 @@
 name: csuuid
-version: 0.2.1
+version: 0.2.2
 
 authors:
   - Kirk Haines <wyhaines@gmail.com>
@@ -14,3 +14,6 @@ development_dependencies:
     version: ~> 0.14
   parse_date:
     github: wyhaines/ParseDate.cr
+  time-ext:
+    github: wyhaines/time-ext.cr
+    branch: main
