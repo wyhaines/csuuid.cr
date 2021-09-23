@@ -31,14 +31,24 @@ The current implementation chose option #2, as it is less work to generate a UUI
 
 CSUUID currently benchmarks to be much faster than the standard Crystal UUID class, as of Crystal 1.1.1. See below for some benchmarks.
 
-Dell XPS 15 - Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz   2.40 GHz - 32GB RAM
-Ubuntu 20.04 on WSL1
-Crystal 1.1.1; LLVM: 10.0.1
+* Dell XPS 15 - Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz   2.40 GHz - 32GB RAM
+* Ubuntu 20.04 on WSL1
+* Crystal 1.1.1; LLVM: 10.0.1
 ```
 CSUUID.new -- generate random, chronologically sortable UUID   2.78M (359.78ns) (± 2.41%)  48.0B/op        fastest
                          UUID.random -- generate random UUID   1.07M (937.03ns) (± 2.27%)   0.0B/op   2.60× slower
 CSUUID.unique -- generate 100 guaranteed unique, sortable IDs  27.48k ( 36.39µs) (± 2.37%)  4.7kB/op        fastest
                         UUID.new -- generate 100 random UUIDs  10.69k ( 93.58µs) (± 2.06%)   0.0B/op   2.57× slower
+```
+
+* Alienware Aurora R11 - Intel(R) Core(TM) i9-10900KF CPU @ 3.70GHz   3.70 GHz - 128GB RAM
+* Ubuntu 20.04 on WSL2
+* Crystal 1.1.1; LLVM: 10.0.1
+```
+CSUUID.new -- generate random, chronologically sortable UUID   5.53M (180.72ns) (± 1.81%)  48.0B/op        fastest
+                         UUID.random -- generate random UUID   3.38M (295.69ns) (± 2.33%)   0.0B/op   1.64× slower
+CSUUID.unique -- generate 100 guaranteed unique, sortable IDs  53.48k ( 18.70µs) (± 1.37%)  4.69kB/op        fastest
+                        UUID.new -- generate 100 random UUIDs  34.06k ( 29.36µs) (± 1.88%)    0.0B/op   1.57× slower
 ```
 
 ## Installation
