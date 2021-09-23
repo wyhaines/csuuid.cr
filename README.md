@@ -35,8 +35,10 @@ Dell XPS 15 - Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz   2.40 GHz - 32GB RAM
 Ubuntu 20.04 on WSL1
 Crystal 1.1.1; LLVM: 10.0.1
 ```
-CSUUID.new -- generate random, chronologically sortable UUID   2.87M (348.99ns) (± 3.51%)  48.0B/op        fastest
-UUID.random -- generate random UUID   1.02M (984.13ns) (± 3.00%)   0.0B/op   2.82× slower
+CSUUID.new -- generate random, chronologically sortable UUID   2.78M (359.78ns) (± 2.41%)  48.0B/op        fastest
+                         UUID.random -- generate random UUID   1.07M (937.03ns) (± 2.27%)   0.0B/op   2.60× slower
+CSUUID.unique -- generate 100 guaranteed unique, sortable IDs  27.48k ( 36.39µs) (± 2.37%)  4.7kB/op        fastest
+                        UUID.new -- generate 100 random UUIDs  10.69k ( 93.58µs) (± 2.06%)   0.0B/op   2.57× slower
 ```
 
 ## Installation

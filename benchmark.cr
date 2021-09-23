@@ -16,3 +16,16 @@ Benchmark.ips do |bench|
 		UUID.random
 	end
 end
+
+Benchmark.ips do |bench|
+	bench.report("CSUUID.unique -- generate 100 guaranteed unique, sortable IDs") do
+		100.times do
+			CSUUID.unique
+		end
+	end
+	bench.report("UUID.new -- generate 100 random UUIDs") do
+		100.times do
+			UUID.random
+		end
+	end
+end
