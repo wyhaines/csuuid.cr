@@ -45,10 +45,10 @@ CSUUID.unique -- generate 100 guaranteed unique, sortable IDs  27.48k ( 36.39µs
 * Ubuntu 20.04 on WSL2
 * Crystal 1.1.1; LLVM: 10.0.1
 ```
-CSUUID.new -- generate random, chronologically sortable UUID   5.53M (180.72ns) (± 1.81%)  48.0B/op        fastest
-                         UUID.random -- generate random UUID   3.38M (295.69ns) (± 2.33%)   0.0B/op   1.64× slower
-CSUUID.unique -- generate 100 guaranteed unique, sortable IDs  53.48k ( 18.70µs) (± 1.37%)  4.69kB/op        fastest
-                        UUID.new -- generate 100 random UUIDs  34.06k ( 29.36µs) (± 1.88%)    0.0B/op   1.57× slower
+CSUUID.new -- generate random, chronologically sortable UUID   6.09M (164.22ns) (± 1.21%)  48.0B/op        fastest
+                         UUID.random -- generate random UUID   3.41M (292.86ns) (± 2.46%)   0.0B/op   1.78× slower
+CSUUID.unique -- generate 100 guaranteed unique, sortable IDs  58.49k ( 17.10µs) (± 1.51%)  4.69kB/op        fastest
+                        UUID.new -- generate 100 random UUIDs  34.58k ( 28.92µs) (± 1.02%)    0.0B/op   1.69× slower
 ```
 
 ## Installation
