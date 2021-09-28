@@ -40,7 +40,7 @@ require "crystal/spin_lock"
 # ```
 #
 struct CSUUID
-  VERSION = "0.2.2"
+  VERSION = "0.2.3"
 
   @@mutex = Crystal::SpinLock.new
   # @@mutex = Mutex.new(protection: Mutex::Protection::Reentrant)
@@ -164,8 +164,8 @@ struct CSUUID
   end
 
   # Return the String representation of the UUID.
-  def to_s : String
+  def to_s(io : IO) : Nil
     hs = @bytes.hexstring
-    "#{hs[0..7]}-#{hs[8..11]}-#{hs[12..15]}-#{hs[16..19]}-#{hs[20..31]}"
+    io << "#{hs[0..7]}-#{hs[8..11]}-#{hs[12..15]}-#{hs[16..19]}-#{hs[20..31]}"
   end
 end

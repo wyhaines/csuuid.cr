@@ -8,6 +8,11 @@ describe CSUUID do
     uuid.to_s.should match CHECKUUID
   end
 
+  it "to_s should function correctly" do
+    uuid = CSUUID.new
+    uuid.to_s.should eq "#{uuid}"
+  end
+
   it "creates a UUID from another UUID" do
     uuid_1 = CSUUID.new
     uuid_2 = CSUUID.new(uuid_1)
