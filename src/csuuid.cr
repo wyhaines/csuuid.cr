@@ -40,7 +40,7 @@ require "crystal/spin_lock"
 # ```
 #
 struct CSUUID
-  VERSION = "0.2.3"
+  VERSION = "0.2.4"
 
   @@mutex = Crystal::SpinLock.new
   # @@mutex = Mutex.new(protection: Mutex::Protection::Reentrant)
@@ -167,5 +167,17 @@ struct CSUUID
   def to_s(io : IO) : Nil
     hs = @bytes.hexstring
     io << "#{hs[0..7]}-#{hs[8..11]}-#{hs[12..15]}-#{hs[16..19]}-#{hs[20..31]}"
+  end
+
+  def <=>(val)
+    s, ns = seconds_and_nanoseconds
+    s_val, ns_val = val.seconds_and_nanoseconds
+    r = s <=> s_val
+    return r unless r == 0
+
+    r = ns <=> ns_val
+    return r unless r == 0
+
+    to_s <=> val.to_s
   end
 end
