@@ -180,4 +180,24 @@ struct CSUUID
 
     to_s <=> val.to_s
   end
+
+  # Returns `true` if `self` is less than *other*.
+  def <(other : CSUUID) : Bool
+    (self <=> other) == -1
+  end
+
+  # Returns `true` if `self` is greater than *other*.
+  def >(other : CSUUID) : Bool
+    (self <=> other) == 1
+  end
+
+  # Returns `true` if `self` is less than or equal to *other*.
+  def <=(other : CSUUID) : Bool
+    self == other || self < other
+  end
+
+  # Returns `true` if `self` is greater than or equal to *other*.
+  def >=(other : CSUUID) : Bool
+    self == other || self > other
+  end
 end

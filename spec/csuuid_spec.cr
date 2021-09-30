@@ -99,4 +99,34 @@ describe CSUUID do
     (uuid2 <=> uuid1).should eq 1
     (uuid1 <=> uuid1).should eq 0
   end
+
+  it "can compare CSUUIDs via <" do
+    uuid1 = CSUUID.new
+    uuid2 = CSUUID.new
+    (uuid1 < uuid2).should be_true
+    (uuid2 < uuid1).should be_false
+  end
+
+  it "can compare CSUUIDs via >" do
+    uuid1 = CSUUID.new
+    uuid2 = CSUUID.new
+    (uuid1 > uuid2).should be_false
+    (uuid2 > uuid1).should be_true
+  end
+
+  it "can compare CSUUIDs via <=" do
+    uuid1 = CSUUID.new
+    uuid2 = CSUUID.new
+    (uuid1 <= uuid2).should be_true
+    (uuid2 <= uuid1).should be_false
+    (uuid1 <= uuid1).should be_true
+  end
+
+  it "can compare CSUUIDs via >=" do
+    uuid1 = CSUUID.new
+    uuid2 = CSUUID.new
+    (uuid1 >= uuid2).should be_false
+    (uuid2 >= uuid1).should be_true
+    (uuid1 >= uuid1).should be_true
+  end
 end
