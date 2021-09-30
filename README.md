@@ -1,4 +1,4 @@
-# CSSUID
+# CSUUID
 
 ![CSUUID CI](https://img.shields.io/github/workflow/status/wyhaines/CSUUID.cr/CSUUID.cr%20CI?style=for-the-badge&logo=GitHub)
 [![GitHub release](https://img.shields.io/github/release/wyhaines/CSUUID.cr.svg?style=for-the-badge)](https://github.com/wyhaines/CSUUID.cr/releases)
@@ -57,8 +57,8 @@ CSUUID.unique -- generate 100 guaranteed unique, sortable IDs  58.49k ( 17.10µs
 
    ```yaml
    dependencies:
-     cssuid:
-       github: wyhaines/cssuid
+     csuuid:
+       github: wyhaines/csuuid.cr
    ```
 
 2. Run `shards install`
@@ -66,7 +66,7 @@ CSUUID.unique -- generate 100 guaranteed unique, sortable IDs  58.49k ( 17.10µs
 ## Usage
 
 ```crystal
-require "cssuid"
+require "csuuid"
 
 uuid = CSUUID.new
 
@@ -80,7 +80,7 @@ uuid = CSUUID.new(dt)
 
 ## Contributing
 
-1. Fork it (<https://github.com/wyhaines/parsedate/fork>)
+1. Fork it (<https://github.com/wyhaines/csuuid.cr/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
