@@ -1,5 +1,5 @@
 name: csuuid
-version: 0.2.4
+version: 0.2.5
 
 authors:
   - Kirk Haines <wyhaines@gmail.com>
@@ -8,12 +8,14 @@ crystal: "*"
 
 license: MIT
 
+dependencies:
+  time-ext:
+    github: wyhaines/time-ext.cr
+    branch: main
+  parse_date:
+    github: wyhaines/ParseDate.cr
+
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba
     version: ~> 0.14
-  parse_date:
-    github: wyhaines/ParseDate.cr
-  time-ext:
-    github: wyhaines/time-ext.cr
-    branch: main
