@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="generator" content="Crystal Docs 1.0.0">
+<meta name="generator" content="Crystal Docs 1.1.1">
 <meta name="crystal_docs.project_version" content="main">
 <meta name="crystal_docs.project_name" content="csuuid">
 
@@ -90,7 +90,6 @@ the timestamp was generated, plus nanoseconds in the current second, plus
 6 bytes for unique identification of the source -- this could be an
 IPV4 address with two null bytes, a MAC address, or some other sequence
 that will fit in 6 bytes.</p>
-
 <p>Nanoseconds will fit in an Int32 (4 bytes), but seconds since the epoch
 will not. The current number of seconds leaks a short distance into a
 5th byte, meaning that in this class, it has to be represented by an
@@ -98,23 +97,17 @@ Int64. This is problematic because a UID allows for 16 bytes, so the
 use of 8 for seconds and 4 for nanoseconds leaves only 4 bytes for system
 identification. It also leaves three bytes in the UUID as zeros because 8
 bytes for seconds is a lot of seconds.</p>
-
 <p>One solution is to combine the seconds and the nanoseconds into a single
-Int64 number. This requires math operations to do efficiently:</p>
-
-<pre><code class="language-crystal">(seconds <span class="o">*</span> <span class="n">1000000000</span>) <span class="o">+</span> nanoseconds</code></pre>
-
-<p>and then more math to extract the original numbers in order to reconstruct
+Int64 number. This requires math operations to do efficiently:
+(seconds * 1000000000) + nanoseconds
+and then more math to extract the original numbers in order to reconstruct
 the original timestamp. This leaves 8 bytes for identification or other
 uniqueness information, which is lovely, but the math requirement is less
 lovely.</p>
-
 <p>The other options is to truncate 2 bytes off of the seconds, storing
 6 bytes of seconds data. This leaves 6 bytes for identification.</p>
-
 <p>The current implementation chose option #2, as it is less work to generate
 a UUID if math is not involved.</p>
-
 <pre><code class="language-plain">+-------------+-----------------+------------+
 | nanoseconds |     seconds     | identifier |
 |    0..3     |      4..10      |   11..15   |
@@ -143,7 +136,7 @@ a UUID if math is not involved.</p>
   </h2>
   
     
-      <a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L42" target="_blank">
+      <a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L42" target="_blank">
         csuuid.cr
       </a>
     
@@ -184,27 +177,27 @@ a UUID if math is not involved.</p>
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#new(seconds:Int64,nanoseconds:Int32,identifier:Slice(UInt8)%7CString%7CNil=nil)-class-method" class="signature"><strong>.new</strong>(seconds : Int64, nanoseconds : Int32, identifier : Slice(UInt8) | String | Nil = <span class="n">nil</span>)</a>
+        <a href="#new%28seconds%3AInt64%2Cnanoseconds%3AInt32%2Cidentifier%3ASlice%28UInt8%29%7CString%7CNil%3Dnil%29-class-method" class="signature"><strong>.new</strong>(seconds : Int64, nanoseconds : Int32, identifier : Slice(UInt8) | String | Nil = <span class="n">nil</span>)</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#new(uuid:String)-class-method" class="signature"><strong>.new</strong>(uuid : String)</a>
+        <a href="#new%28uuid%3AString%29-class-method" class="signature"><strong>.new</strong>(uuid : String)</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#new(uuid:UUID%7CCSUUID)-class-method" class="signature"><strong>.new</strong>(uuid : UUID | CSUUID)</a>
+        <a href="#new%28uuid%3AUUID%7CCSUUID%29-class-method" class="signature"><strong>.new</strong>(uuid : UUID | CSUUID)</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#new(timestamp:Time,identifier:Slice(UInt8)%7CString%7CNil=nil)-class-method" class="signature"><strong>.new</strong>(timestamp : Time, identifier : Slice(UInt8) | String | Nil = <span class="n">nil</span>)</a>
+        <a href="#new%28timestamp%3ATime%2Cidentifier%3ASlice%28UInt8%29%7CString%7CNil%3Dnil%29-class-method" class="signature"><strong>.new</strong>(timestamp : Time, identifier : Slice(UInt8) | String | Nil = <span class="n">nil</span>)</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#new(identifier:Slice(UInt8)%7CString%7CNil=nil)-class-method" class="signature"><strong>.new</strong>(identifier : Slice(UInt8) | String | Nil = <span class="n">nil</span>)</a>
+        <a href="#new%28identifier%3ASlice%28UInt8%29%7CString%7CNil%3Dnil%29-class-method" class="signature"><strong>.new</strong>(identifier : Slice(UInt8) | String | Nil = <span class="n">nil</span>)</a>
         
       </li>
     
@@ -223,7 +216,7 @@ a UUID if math is not involved.</p>
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#generate(count)-class-method" class="signature"><strong>.generate</strong>(count)</a>
+        <a href="#generate%28count%29-class-method" class="signature"><strong>.generate</strong>(count)</a>
         
       </li>
     
@@ -247,61 +240,61 @@ a UUID if math is not involved.</p>
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#%3C(other:CSUUID):Bool-instance-method" class="signature"><strong>#<</strong>(other : CSUUID) : Bool</a>
+        <a href="#%3C%28other%3ACSUUID%29%3ABool-instance-method" class="signature"><strong>#<</strong>(other : CSUUID) : Bool</a>
         
           <div class="summary"><p>Returns <code>true</code> if <code>self</code> is less than <em>other</em>.</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#%3C=(other:CSUUID):Bool-instance-method" class="signature"><strong>#<=</strong>(other : CSUUID) : Bool</a>
+        <a href="#%3C%3D%28other%3ACSUUID%29%3ABool-instance-method" class="signature"><strong>#<=</strong>(other : CSUUID) : Bool</a>
         
           <div class="summary"><p>Returns <code>true</code> if <code>self</code> is less than or equal to <em>other</em>.</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#%3C=%3E(val)-instance-method" class="signature"><strong>#<=></strong>(val)</a>
+        <a href="#%3C%3D%3E%28val%29-instance-method" class="signature"><strong>#<=></strong>(val)</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#%3E(other:CSUUID):Bool-instance-method" class="signature"><strong>#></strong>(other : CSUUID) : Bool</a>
+        <a href="#%3E%28other%3ACSUUID%29%3ABool-instance-method" class="signature"><strong>#></strong>(other : CSUUID) : Bool</a>
         
           <div class="summary"><p>Returns <code>true</code> if <code>self</code> is greater than <em>other</em>.</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#%3E=(other:CSUUID):Bool-instance-method" class="signature"><strong>#>=</strong>(other : CSUUID) : Bool</a>
+        <a href="#%3E%3D%28other%3ACSUUID%29%3ABool-instance-method" class="signature"><strong>#>=</strong>(other : CSUUID) : Bool</a>
         
           <div class="summary"><p>Returns <code>true</code> if <code>self</code> is greater than or equal to <em>other</em>.</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#seconds_and_nanoseconds:Tuple(Int64,Int32)-instance-method" class="signature"><strong>#seconds_and_nanoseconds</strong> : Tuple(Int64, Int32)</a>
+        <a href="#seconds_and_nanoseconds%3ATuple%28Int64%2CInt32%29-instance-method" class="signature"><strong>#seconds_and_nanoseconds</strong> : Tuple(Int64, Int32)</a>
         
           <div class="summary"><p>This returns a tuple containing the seconds since the epoch as well as the nanoseconds in the current second for the UUID.</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#timestamp:Time-instance-method" class="signature"><strong>#timestamp</strong> : Time</a>
+        <a href="#timestamp%3ATime-instance-method" class="signature"><strong>#timestamp</strong> : Time</a>
         
           <div class="summary"><p>Return a Time object representing the timestamp encoded into the UUID as local time.</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#to_s(io:IO):Nil-instance-method" class="signature"><strong>#to_s</strong>(io : IO) : Nil</a>
+        <a href="#to_s%28io%3AIO%29%3ANil-instance-method" class="signature"><strong>#to_s</strong>(io : IO) : Nil</a>
         
           <div class="summary"><p>Return the String representation of the UUID.</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#utc:Time-instance-method" class="signature"><strong>#utc</strong> : Time</a>
+        <a href="#utc%3ATime-instance-method" class="signature"><strong>#utc</strong> : Time</a>
         
           <div class="summary"><p>Return a Time object representing the timestamp encoded into the UUID as UTC time.</p></div>
         
@@ -362,13 +355,13 @@ a UUID if math is not involved.</p>
         
         def self.<strong>new</strong>(seconds : Int64, nanoseconds : Int32, identifier : Slice(UInt8) | String | Nil = <span class="n">nil</span>)
 
-        <a class="method-permalink" href="#new(seconds:Int64,nanoseconds:Int32,identifier:Slice(UInt8)%7CString%7CNil=nil)-class-method">#</a>
+        <a class="method-permalink" href="#new%28seconds%3AInt64%2Cnanoseconds%3AInt32%2Cidentifier%3ASlice%28UInt8%29%7CString%7CNil%3Dnil%29-class-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L102" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L100" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -378,13 +371,13 @@ a UUID if math is not involved.</p>
         
         def self.<strong>new</strong>(uuid : String)
 
-        <a class="method-permalink" href="#new(uuid:String)-class-method">#</a>
+        <a class="method-permalink" href="#new%28uuid%3AString%29-class-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L94" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L92" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -394,13 +387,13 @@ a UUID if math is not involved.</p>
         
         def self.<strong>new</strong>(uuid : UUID | <a href="CSUUID.html">CSUUID</a>)
 
-        <a class="method-permalink" href="#new(uuid:UUID%7CCSUUID)-class-method">#</a>
+        <a class="method-permalink" href="#new%28uuid%3AUUID%7CCSUUID%29-class-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L98" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L96" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -410,13 +403,13 @@ a UUID if math is not involved.</p>
         
         def self.<strong>new</strong>(timestamp : Time, identifier : Slice(UInt8) | String | Nil = <span class="n">nil</span>)
 
-        <a class="method-permalink" href="#new(timestamp:Time,identifier:Slice(UInt8)%7CString%7CNil=nil)-class-method">#</a>
+        <a class="method-permalink" href="#new%28timestamp%3ATime%2Cidentifier%3ASlice%28UInt8%29%7CString%7CNil%3Dnil%29-class-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L106" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L104" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -426,13 +419,13 @@ a UUID if math is not involved.</p>
         
         def self.<strong>new</strong>(identifier : Slice(UInt8) | String | Nil = <span class="n">nil</span>)
 
-        <a class="method-permalink" href="#new(identifier:Slice(UInt8)%7CString%7CNil=nil)-class-method">#</a>
+        <a class="method-permalink" href="#new%28identifier%3ASlice%28UInt8%29%7CString%7CNil%3Dnil%29-class-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L110" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L108" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -454,13 +447,13 @@ a UUID if math is not involved.</p>
         
         def self.<strong>generate</strong>(count)
 
-        <a class="method-permalink" href="#generate(count)-class-method">#</a>
+        <a class="method-permalink" href="#generate%28count%29-class-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L77" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L75" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -476,7 +469,7 @@ a UUID if math is not involved.</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L58" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L56" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -498,7 +491,7 @@ a UUID if math is not involved.</p>
         
         def <strong><</strong>(other : <a href="CSUUID.html">CSUUID</a>) : Bool
 
-        <a class="method-permalink" href="#%3C(other:CSUUID):Bool-instance-method">#</a>
+        <a class="method-permalink" href="#%3C%28other%3ACSUUID%29%3ABool-instance-method">#</a>
       </div>
       
         <div class="doc">
@@ -509,7 +502,7 @@ a UUID if math is not involved.</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L185" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L183" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -519,7 +512,7 @@ a UUID if math is not involved.</p>
         
         def <strong><=</strong>(other : <a href="CSUUID.html">CSUUID</a>) : Bool
 
-        <a class="method-permalink" href="#%3C=(other:CSUUID):Bool-instance-method">#</a>
+        <a class="method-permalink" href="#%3C%3D%28other%3ACSUUID%29%3ABool-instance-method">#</a>
       </div>
       
         <div class="doc">
@@ -530,7 +523,7 @@ a UUID if math is not involved.</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L195" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L193" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -540,13 +533,13 @@ a UUID if math is not involved.</p>
         
         def <strong><=></strong>(val)
 
-        <a class="method-permalink" href="#%3C=%3E(val)-instance-method">#</a>
+        <a class="method-permalink" href="#%3C%3D%3E%28val%29-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L172" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L170" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -556,7 +549,7 @@ a UUID if math is not involved.</p>
         
         def <strong>></strong>(other : <a href="CSUUID.html">CSUUID</a>) : Bool
 
-        <a class="method-permalink" href="#%3E(other:CSUUID):Bool-instance-method">#</a>
+        <a class="method-permalink" href="#%3E%28other%3ACSUUID%29%3ABool-instance-method">#</a>
       </div>
       
         <div class="doc">
@@ -567,7 +560,7 @@ a UUID if math is not involved.</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L190" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L188" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -577,7 +570,7 @@ a UUID if math is not involved.</p>
         
         def <strong>>=</strong>(other : <a href="CSUUID.html">CSUUID</a>) : Bool
 
-        <a class="method-permalink" href="#%3E=(other:CSUUID):Bool-instance-method">#</a>
+        <a class="method-permalink" href="#%3E%3D%28other%3ACSUUID%29%3ABool-instance-method">#</a>
       </div>
       
         <div class="doc">
@@ -588,7 +581,7 @@ a UUID if math is not involved.</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L200" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L198" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -598,7 +591,7 @@ a UUID if math is not involved.</p>
         
         def <strong>seconds_and_nanoseconds</strong> : Tuple(Int64, Int32)
 
-        <a class="method-permalink" href="#seconds_and_nanoseconds:Tuple(Int64,Int32)-instance-method">#</a>
+        <a class="method-permalink" href="#seconds_and_nanoseconds%3ATuple%28Int64%2CInt32%29-instance-method">#</a>
       </div>
       
         <div class="doc">
@@ -610,7 +603,7 @@ as the nanoseconds in the current second for the UUID.</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L138" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L136" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -620,7 +613,7 @@ as the nanoseconds in the current second for the UUID.</p>
         
         def <strong>timestamp</strong> : Time
 
-        <a class="method-permalink" href="#timestamp:Time-instance-method">#</a>
+        <a class="method-permalink" href="#timestamp%3ATime-instance-method">#</a>
       </div>
       
         <div class="doc">
@@ -631,7 +624,7 @@ as the nanoseconds in the current second for the UUID.</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L151" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L149" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -641,7 +634,7 @@ as the nanoseconds in the current second for the UUID.</p>
         
         def <strong>to_s</strong>(io : IO) : Nil
 
-        <a class="method-permalink" href="#to_s(io:IO):Nil-instance-method">#</a>
+        <a class="method-permalink" href="#to_s%28io%3AIO%29%3ANil-instance-method">#</a>
       </div>
       
         <div class="doc">
@@ -652,7 +645,7 @@ as the nanoseconds in the current second for the UUID.</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L167" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L165" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -662,7 +655,7 @@ as the nanoseconds in the current second for the UUID.</p>
         
         def <strong>utc</strong> : Time
 
-        <a class="method-permalink" href="#utc:Time-instance-method">#</a>
+        <a class="method-permalink" href="#utc%3ATime-instance-method">#</a>
       </div>
       
         <div class="doc">
@@ -673,7 +666,7 @@ as the nanoseconds in the current second for the UUID.</p>
       <br/>
       <div>
         
-          [<a href="https://github.com/wyhaines/csuuid.cr/blob/14f9efa8e53c76f8c972649a1d7467dc011faa57/src/csuuid.cr#L159" target="_blank">View source</a>]
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/cc004e68090969a3d5f75ded62b2bf29218e4af3/src/csuuid.cr#L157" target="_blank">View source</a>]
         
       </div>
     </div>

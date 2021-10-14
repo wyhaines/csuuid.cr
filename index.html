@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="generator" content="Crystal Docs 1.0.0">
+<meta name="generator" content="Crystal Docs 1.1.1">
 <meta name="crystal_docs.project_version" content="main">
 <meta name="crystal_docs.project_name" content="csuuid">
 
@@ -63,81 +63,69 @@
 
 
 <div class="main-content">
-<h1><a id="csuuid" class="anchor" href="#csuuid">
-  <svg class="octicon-link" aria-hidden="true">
+<h1><a id="csuuid" class="anchor" href="#csuuid">  <svg class="octicon-link" aria-hidden="true">
     <use href="#octicon-link"/>
   </svg>
 </a>CSUUID</h1>
-
-<p><img src="https://img.shields.io/github/workflow/status/wyhaines/CSUUID.cr/CSUUID.cr%20CI?style=for-the-badge&logo=GitHub" alt="CSUUID CI"/>
-<a href="https://github.com/wyhaines/CSUUID.cr/releases"><img src="https://img.shields.io/github/release/wyhaines/CSUUID.cr.svg?style=for-the-badge" alt="GitHub release"/></a>
-<img src="https://img.shields.io/github/commits-since/wyhaines/CSUUID.cr/latest?style=for-the-badge" alt="GitHub commits since latest release (by SemVer)"/></p>
-
+<p><img src="https://img.shields.io/github/workflow/status/wyhaines/CSUUID.cr/CSUUID.cr%20CI?style=for-the-badge&amp;logo=GitHub" alt="CSUUID CI" />
+<a href="https://github.com/wyhaines/CSUUID.cr/releases"><img src="https://img.shields.io/github/release/wyhaines/CSUUID.cr.svg?style=for-the-badge" alt="GitHub release" /></a>
+<img src="https://img.shields.io/github/commits-since/wyhaines/CSUUID.cr/latest?style=for-the-badge" alt="GitHub commits since latest release (by SemVer)" /></p>
 <p>This struct wraps up a UUID that encodes a timestamp measured as seconds from the epoch <code>(0001-01-01 00:00:00.0 UTC)</code> observed at the location where the timestamp was generated, plus nanoseconds in the current second, plus 6 bytes for unique identification of the source -- this could be an IPV4 address with two null bytes, a MAC address, or some other sequence that will fit in 6 bytes.</p>
-
 <p>Nanoseconds will fit in an Int32 (4 bytes), but seconds since the epoch will not. The current number of seconds leaks a short distance into a 5th byte, meaning that in this class, it has to be represented by an Int64. This is problematic because a UID allows for 16 bytes, so the use of 8 for seconds and 4 for nanoseconds leaves only 4 bytes for system identification. It also leaves three bytes in the UUID as zeros because 8 bytes for seconds is a lot of seconds.</p>
-
 <p>One solution is to combine the seconds and the nanoseconds into a single Int64 number. This requires math operations to do efficiently:</p>
-
 <pre><code class="language-crystal">(seconds <span class="o">*</span> <span class="n">1000000000</span>) <span class="o">+</span> nanoseconds</code></pre>
-
 <p>and then more math to extract the original numbers in order to reconstruct the original timestamp. This leaves 8 bytes for identification or other uniqueness information, which is lovely, but the math requirement is less lovely.</p>
-
 <p>The other options is to truncate 2 bytes off of the seconds, storing 6 bytes of seconds data. This leaves 6 bytes for identification.</p>
-
 <p>The current implementation chose option #2, as it is less work to generate a UUID if math is not involved.</p>
-
 <pre><code class="language-crystal">+-------------+-----------------+------------+
 | nanoseconds |     seconds     | identifier |
 |    0..3     |      4..10      |   11..15   |
 +-------------+-----------------+------------+</code></pre>
-
 <h2><a id="benchmarks" class="anchor" href="#benchmarks">
   <svg class="octicon-link" aria-hidden="true">
     <use href="#octicon-link"/>
   </svg>
 </a>Benchmarks</h2>
-
 <p>CSUUID currently benchmarks to be much faster than the standard Crystal UUID class, as of Crystal 1.1.1. See below for some benchmarks.</p>
-
-<ul><li>Dell XPS 15 - Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz   2.40 GHz - 32GB RAM</li><li>Ubuntu 20.04 on WSL1</li><li>Crystal 1.1.1; LLVM: 10.0.1</li></ul>
-
+<ul>
+<li>Dell XPS 15 - Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz   2.40 GHz - 32GB RAM</li>
+<li>Ubuntu 20.04 on WSL1</li>
+<li>Crystal 1.1.1; LLVM: 10.0.1</li>
+</ul>
 <pre><code class="language-crystal">CSUUID.new -- generate random, chronologically sortable UUID   2.78M (359.78ns) (± 2.41%)  48.0B/op        fastest
                          UUID.random -- generate random UUID   1.07M (937.03ns) (± 2.27%)   0.0B/op   2.60× slower
 CSUUID.unique -- generate 100 guaranteed unique, sortable IDs  27.48k ( 36.39µs) (± 2.37%)  4.7kB/op        fastest
                         UUID.new -- generate 100 random UUIDs  10.69k ( 93.58µs) (± 2.06%)   0.0B/op   2.57× slower</code></pre>
-
-<ul><li>Alienware Aurora R11 - Intel(R) Core(TM) i9-10900KF CPU @ 3.70GHz   3.70 GHz - 128GB RAM</li><li>Ubuntu 20.04 on WSL2</li><li>Crystal 1.1.1; LLVM: 10.0.1</li></ul>
-
+<ul>
+<li>Alienware Aurora R11 - Intel(R) Core(TM) i9-10900KF CPU @ 3.70GHz   3.70 GHz - 128GB RAM</li>
+<li>Ubuntu 20.04 on WSL2</li>
+<li>Crystal 1.1.1; LLVM: 10.0.1</li>
+</ul>
 <pre><code class="language-crystal">CSUUID.new -- generate random, chronologically sortable UUID   6.09M (164.22ns) (± 1.21%)  48.0B/op        fastest
                          UUID.random -- generate random UUID   3.41M (292.86ns) (± 2.46%)   0.0B/op   1.78× slower
 CSUUID.unique -- generate 100 guaranteed unique, sortable IDs  58.49k ( 17.10µs) (± 1.51%)  4.69kB/op        fastest
                         UUID.new -- generate 100 random UUIDs  34.58k ( 28.92µs) (± 1.02%)    0.0B/op   1.69× slower</code></pre>
-
 <h2><a id="installation" class="anchor" href="#installation">
   <svg class="octicon-link" aria-hidden="true">
     <use href="#octicon-link"/>
   </svg>
 </a>Installation</h2>
-
-<ol><li>Add the dependency to your <code>shard.yml</code>:</li></ol>
-
-<p><code></code>`yaml
-   dependencies:</p>
-
-<pre><code class="language-crystal"> csuuid:
-   github: wyhaines/csuuid.cr</code></pre>
-
-<p><code></code>`</p>
-
-<ol><li>Run <code>shards install</code></li></ol>
-
+<ol>
+<li>
+<p>Add the dependency to your <code>shard.yml</code>:</p>
+<pre><code class="language-yaml">dependencies:
+  csuuid:
+    github: wyhaines/csuuid.cr</code></pre>
+</li>
+<li>
+<p>Run <code>shards install</code></p>
+</li>
+</ol>
 <h2><a id="usage" class="anchor" href="#usage">
   <svg class="octicon-link" aria-hidden="true">
     <use href="#octicon-link"/>
   </svg>
 </a>Usage</h2>
-
 <pre><code class="language-crystal"><span class="k">require</span> <span class="s">&quot;csuuid&quot;</span>
 
 uuid <span class="o">=</span> <span class="t">CSUUID</span>.<span class="k">new</span>
@@ -148,25 +136,28 @@ uuid <span class="o">=</span> <span class="t">CSUUID</span>.<span class="k">new<
 
 dt <span class="o">=</span> <span class="t">ParseDate</span>.parse(<span class="s">&quot;2020/07/29 09:15:37&quot;</span>)
 uuid <span class="o">=</span> <span class="t">CSUUID</span>.<span class="k">new</span>(dt)</code></pre>
-
 <h2><a id="contributing" class="anchor" href="#contributing">
   <svg class="octicon-link" aria-hidden="true">
     <use href="#octicon-link"/>
   </svg>
 </a>Contributing</h2>
-
-<ol><li>Fork it (&lt;https://github.com/wyhaines/csuuid.cr/fork>)</li><li>Create your feature branch (<code>git checkout -b my-new-feature</code>)</li><li>Commit your changes (<code>git commit -am 'Add some feature'</code>)</li><li>Push to the branch (<code>git push origin my-new-feature</code>)</li><li>Create a new Pull Request</li></ol>
-
+<ol>
+<li>Fork it (<a href="https://github.com/wyhaines/csuuid.cr/fork">https://github.com/wyhaines/csuuid.cr/fork</a>)</li>
+<li>Create your feature branch (<code>git checkout -b my-new-feature</code>)</li>
+<li>Commit your changes (<code>git commit -am 'Add some feature'</code>)</li>
+<li>Push to the branch (<code>git push origin my-new-feature</code>)</li>
+<li>Create a new Pull Request</li>
+</ol>
 <h2><a id="contributors" class="anchor" href="#contributors">
   <svg class="octicon-link" aria-hidden="true">
     <use href="#octicon-link"/>
   </svg>
 </a>Contributors</h2>
-
-<ul><li><a href="https://github.com/wyhaines">Kirk Haines</a> - creator and maintainer</li></ul>
-
-<p><img src="https://img.shields.io/github/languages/code-size/wyhaines/CSUUID.cr?style=for-the-badge" alt="GitHub code size in bytes"/>
-<img src="https://img.shields.io/github/issues/wyhaines/CSUUID.cr?style=for-the-badge" alt="GitHub issues"/></p>
+<ul>
+<li><a href="https://github.com/wyhaines">Kirk Haines</a> - creator and maintainer</li>
+</ul>
+<p><img src="https://img.shields.io/github/languages/code-size/wyhaines/CSUUID.cr?style=for-the-badge" alt="GitHub code size in bytes" />
+<img src="https://img.shields.io/github/issues/wyhaines/CSUUID.cr?style=for-the-badge" alt="GitHub issues" /></p>
 </div>
 </body>
 </html>
