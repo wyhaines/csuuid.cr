@@ -43,9 +43,7 @@ struct CSUUID
   VERSION = "0.2.3"
 
   @@mutex = Crystal::SpinLock.new
-  # @@mutex = Mutex.new(protection: Mutex::Protection::Reentrant)
   @@prng = Random::ISAAC.new
-  @@string_matcher = /^(........)-(....)-(....)-(....)-(............)/
   @@unique_identifier : Slice(UInt8) = Slice(UInt8).new(6, 0)
   @@unique_seconds_and_nanoseconds : Tuple(Int64, Int32) = {0_i64, 0_i32}
 
