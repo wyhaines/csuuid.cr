@@ -40,7 +40,7 @@ require "crystal/spin_lock"
 # ```
 #
 struct CSUUID
-  VERSION = "0.2.5"
+  VERSION = "0.3.0"
 
   @@mutex = Crystal::SpinLock.new
   @@prng = Random::ISAAC.new

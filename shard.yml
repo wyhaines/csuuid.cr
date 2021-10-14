@@ -1,12 +1,12 @@
 name: csuuid
-version: 0.2.5
+version: 0.3.0
 
 authors:
   - Kirk Haines <wyhaines@gmail.com>
 
 crystal: "*"
 
-license: MIT
+license: "Apache 2.0"
 
 dependencies:
   time-ext:
