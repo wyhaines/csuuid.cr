@@ -40,14 +40,15 @@ require "crystal/spin_lock"
 # ```
 #
 struct CSUUID
-  VERSION = "0.3.0"
+  VERSION = "0.3.1"
 
   @@mutex = Crystal::SpinLock.new
   @@prng = Random::ISAAC.new
   @@unique_identifier : Slice(UInt8) = Slice(UInt8).new(6, 0)
   @@unique_seconds_and_nanoseconds : Tuple(Int64, Int32) = {0_i64, 0_i32}
 
-  @bytes : Slice(UInt8) = Slice(UInt8).new(16)
+  # A getter to allow access to the raw byte buffer for the CSUUID.
+  getter bytes : Slice(UInt8) = Slice(UInt8).new(16)
   @seconds_and_nanoseconds : Tuple(Int64, Int32)?
   @timestamp : Time?
   @utc : Time?
@@ -74,7 +75,7 @@ struct CSUUID
 
   def self.generate(count)
     result = [] of CSUUID
-    count.times {result << unique}
+    count.times { result << unique }
 
     result
   end
@@ -113,13 +114,13 @@ struct CSUUID
 
   private def initialize_impl(seconds : Int64, nanoseconds : Int32, identifier : Slice(UInt8) | String | Nil)
     id = if identifier.is_a?(String)
-      buf = Slice(UInt8).new(6)
-      number_of_bytes = identifier.size < 6 ? identifier.size : 6
-      buf[0, number_of_bytes].copy_from(identifier.hexbytes[0, number_of_bytes])
-      buf
-    else
-      identifier
-    end
+           buf = Slice(UInt8).new(6)
+           number_of_bytes = identifier.size < 6 ? identifier.size : 6
+           buf[0, number_of_bytes].copy_from(identifier.hexbytes[0, number_of_bytes])
+           buf
+         else
+           identifier
+         end
 
     IO::ByteFormat::BigEndian.encode(seconds, @bytes[2, 8])
     IO::ByteFormat::BigEndian.encode(nanoseconds, @bytes[0, 4])
