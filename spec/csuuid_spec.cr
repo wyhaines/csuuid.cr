@@ -129,4 +129,15 @@ describe CSUUID do
     (uuid2 >= uuid1).should be_true
     (uuid1 >= uuid1).should be_true
   end
+
+  it "can work with PCG32 as the generator" do
+    CSUUID.prng = Random::PCG32.new
+    uuid1 = CSUUID.unique
+    uuid2 = CSUUID.unique
+    CHECKUUID.match(uuid1.to_s).should_not be_nil
+    CHECKUUID.match(uuid2.to_s).should_not be_nil
+    uuid1.should_not eq uuid2
+    uuid2.should be > uuid1
+  end
+
 end

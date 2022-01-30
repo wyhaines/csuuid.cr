@@ -39,11 +39,12 @@ require "crystal/spin_lock"
 # +-------------+-----------------+------------+
 # ```
 #
-struct CSUUID
-  VERSION = "0.3.1"
 
+struct CSUUID
+  VERSION = "0.4.0"
+
+  class_property prng : Random::ISAAC | Random::PCG32 = Random::ISAAC.new
   @@mutex = Crystal::SpinLock.new
-  @@prng = Random::ISAAC.new
   @@unique_identifier : Slice(UInt8) = Slice(UInt8).new(6, 0)
   @@unique_seconds_and_nanoseconds : Tuple(Int64, Int32) = {0_i64, 0_i32}
 
@@ -62,7 +63,7 @@ struct CSUUID
         increment_unique_identifier
       else
         @@unique_seconds_and_nanoseconds = {t.internal_seconds, t.internal_nanoseconds}
-        @@unique_identifier = @@prng.random_bytes(6)
+        @@unique_identifier = prng.random_bytes(6)
       end
 
       new(
@@ -107,7 +108,7 @@ struct CSUUID
   end
 
   def initialize(identifier : Slice(UInt8) | String | Nil = nil)
-    identifier ||= @@prng.random_bytes(6)
+    identifier ||= CSUUID.prng.random_bytes(6)
     t = Time.local
     initialize_impl(t.internal_seconds, t.internal_nanoseconds, identifier)
   end
@@ -128,7 +129,7 @@ struct CSUUID
       # Random::ISAAC.random_bytes doesn't appear to be threadsafe.
       # It sometimes dies ugly in multithreaded code, so we need a
       # lock in this one tiny little space to avoid that.
-      @bytes[10, 6].copy_from(id || @@prng.random_bytes(6))
+      @bytes[10, 6].copy_from(id || CSUUID.prng.random_bytes(6))
     end
   end
 
