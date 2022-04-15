@@ -13,13 +13,13 @@ describe CSUUID do
     uuid.to_s.should eq "#{uuid}"
   end
 
-  it "creates a UUID from another UUID" do
+  it "creates a CSUUID from another CSUUID" do
     uuid_1 = CSUUID.new
     uuid_2 = CSUUID.new(uuid_1)
     uuid_1.should eq uuid_2
   end
 
-  it "creates a UUID from another UUID string" do
+  it "creates a CSUUID from another CSUUID string" do
     uuid_1 = CSUUID.new
     uuid_2 = CSUUID.new(uuid_1.to_s)
     uuid_1.should eq uuid_2
@@ -27,26 +27,26 @@ describe CSUUID do
 
   it "generates a UUID from an explicit second/nanosecond displacement" do
     uuid = CSUUID.new(seconds: 9223372036, nanoseconds: 729262400)
-    uuid.to_s.should match /2b77a940-0002-25c1-7d04/
+    uuid.to_s.should match /000225c1-7d04-2b77-a940/
   end
 
   it "generates a UUID from an explicit second/nanosecond displacement and explicit identifier" do
     uuid = CSUUID.new(seconds: 9223372036, nanoseconds: 729262400, identifier: "79f659ccb685")
-    uuid.to_s.should match /2b77a940-0002-25c1-7d04-79f659ccb685/
+    uuid.to_s.should match /000225c1-7d04-2b77-a940-79f659ccb685/
   end
 
   it "generates a UUID from a timestamp, with or without an explicit identifier" do
     dt = ParseDate.parse("2020/07/29 09:15:37")
     uuid = CSUUID.new(dt)
-    uuid.to_s.should match /00000000-000e-d6b3-3539/
+    uuid.to_s.should match /000ed6b3-3539-0000-0000/
 
     dt = ParseDate.parse("2020/07/29 09:15:37").as(Time)
     uuid = CSUUID.new(timestamp: dt, identifier: "79f659ccb685")
-    uuid.to_s.should match /00000000-000e-d6b3-3539-79f659ccb685/
+    uuid.to_s.should match /000ed6b3-3539-0000-0000-79f659ccb685/
   end
 
   it "generates a UUID from just an identifier" do
-    uuid = CSUUID.new(identifier: "79f659ccb685")
+    uuid = CSUUID.new(identifier: "79f659ccb685".hexbytes)
     uuid.to_s.should match /-79f659ccb685/
   end
 
@@ -139,5 +139,4 @@ describe CSUUID do
     uuid1.should_not eq uuid2
     uuid2.should be > uuid1
   end
-
 end

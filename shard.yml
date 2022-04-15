@@ -1,5 +1,5 @@
 name: csuuid
-version: 0.4.0
+version: 1.0.0
 
 authors:
   - Kirk Haines <wyhaines@gmail.com>
@@ -18,4 +18,4 @@ dependencies:
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba
-    version: ~> 0.14
+    version: 1.0.0

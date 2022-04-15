@@ -78,6 +78,10 @@ dt = ParseDate.parse("2020/07/29 09:15:37")
 uuid = CSUUID.new(dt)
 ```
 
+## API Docs
+
+https://wyhaines.github.io/csuuid.cr/
+
 ## Contributing
 
 1. Fork it (<https://github.com/wyhaines/csuuid.cr/fork>)

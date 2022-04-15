@@ -1,3 +1,4 @@
+require "./version"
 require "uuid"
 require "time-ext"
 require "random/isaac"
@@ -32,6 +33,12 @@ require "crystal/spin_lock"
 # The current implementation chose option #2, as it is less work to generate
 # a UUID if math is not involved.
 #
+# Thus, the byte structure of a CSUUID is as follows:
+#
+# An argument could be made for decreasing the nanosecond resolution to something
+# more granular, and adding those bytes to the identifier/entropy portion of the
+# ID, but as designed this structure allows for very precise sorting of the IDs.
+#
 # ```plain
 # +-------------+-----------------+------------+
 # | nanoseconds |     seconds     | identifier |
@@ -39,11 +46,10 @@ require "crystal/spin_lock"
 # +-------------+-----------------+------------+
 # ```
 #
-
 struct CSUUID
-  VERSION = "0.4.0"
-
-  class_property prng : Random::ISAAC | Random::PCG32 = Random::ISAAC.new
+  # CSUUID will work with any source of entropy that inherits from Random.
+  # It defaults to `Random::ISAAC`.
+  class_property prng : Random = Random::ISAAC.new
   @@mutex = Crystal::SpinLock.new
   @@unique_identifier : Slice(UInt8) = Slice(UInt8).new(6, 0)
   @@unique_seconds_and_nanoseconds : Tuple(Int64, Int32) = {0_i64, 0_i32}
@@ -55,6 +61,7 @@ struct CSUUID
   @utc : Time?
   @location : Time::Location = Time::Location.local
 
+  # Generate a guaranteed unique (for this process) CSUUID.
   def self.unique
     @@mutex.sync do
       t = Time.local
@@ -74,6 +81,7 @@ struct CSUUID
     end
   end
 
+  # Generate a sequence of CSUUIDS of the requested *count* length.
   def self.generate(count)
     result = [] of CSUUID
     count.times { result << unique }
@@ -91,23 +99,36 @@ struct CSUUID
     @@unique_identifier
   end
 
+  # Create a new CSUUID from the string representation of a UUID, with or without dashes.
+  # If the string represents a CSUUID, the new CSUUID will be a copy of the original. If
+  # the string represents a traditional UUID, the new CSUUID will have a different byte
+  # order from the original.
   def initialize(uuid : String)
-    @bytes = uuid.tr("-", "").hexbytes
+    hb = uuid.tr("-", "").hexbytes
+    @bytes[0..3].copy_from(hb[6..9])
+    @bytes[4..10].copy_from(hb[0..5])
+    @bytes[10..15].copy_from(hb[10..15])
   end
 
+  # Create a new CSUUID from a given UUID or CSUUID object. If the object is a CSUUID,
+  # the new CSUUID will be a copy of the original. If the object is a traditional UUID,
+  # the new CSUUID will have a different byte order from the original.
   def initialize(uuid : UUID | CSUUID)
-    @bytes = uuid.to_s.tr("-", "").hexbytes
+    @bytes = uuid.bytes
   end
 
+  # Create a new CSUUID from the given seconds, nanoseconds, and optional identifier/entropy.
   def initialize(seconds : Int64, nanoseconds : Int32, identifier : Slice(UInt8) | String | Nil = nil)
     initialize_impl(seconds, nanoseconds, identifier)
   end
 
+  # Create a new CSUUID from the given Time object and optional identifier/entropy.
   def initialize(timestamp : Time, identifier : Slice(UInt8) | String | Nil = nil)
     initialize_impl(timestamp.internal_seconds, timestamp.internal_nanoseconds, identifier)
   end
 
-  def initialize(identifier : Slice(UInt8) | String | Nil = nil)
+  # Create a new CSUUID from the given identifier/entropy value alone.
+  def initialize(identifier : Slice(UInt8) | Nil = nil)
     identifier ||= CSUUID.prng.random_bytes(6)
     t = Time.local
     initialize_impl(t.internal_seconds, t.internal_nanoseconds, identifier)
@@ -129,6 +150,8 @@ struct CSUUID
       # Random::ISAAC.random_bytes doesn't appear to be threadsafe.
       # It sometimes dies ugly in multithreaded code, so we need a
       # lock in this one tiny little space to avoid that.
+      # TODO: Check if this is still the case post Crystal 1.4.0,
+      # and if it is, fix Crypt::ISAAC and send in a PR.
       @bytes[10, 6].copy_from(id || CSUUID.prng.random_bytes(6))
     end
   end
@@ -166,10 +189,12 @@ struct CSUUID
   # Return the String representation of the UUID.
   def to_s(io : IO) : Nil
     hs = @bytes.hexstring
-    io << "#{hs[0..7]}-#{hs[8..11]}-#{hs[12..15]}-#{hs[16..19]}-#{hs[20..31]}"
+    io << "#{hs[8..15]}-#{hs[16..19]}-#{hs[0..3]}-#{hs[4..7]}-#{hs[20..31]}"
   end
 
-  def <=>(val)
+  # Compare two CSUUID objects, returning -1 if the first is less than the second,
+  # 0 if they are equal, and 1 if the first is greater than the second.
+  def <=>(val : CSUUID)
     s, ns = seconds_and_nanoseconds
     s_val, ns_val = val.seconds_and_nanoseconds
     r = s <=> s_val
