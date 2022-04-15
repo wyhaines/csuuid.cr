@@ -20,12 +20,22 @@ The other options is to truncate 2 bytes off of the seconds, storing 6 bytes of 
     
 The current implementation chose option #2, as it is less work to generate a UUID if math is not involved.
 
+The byte structure of the CSUUID is:
+
 ``` 
 +-------------+-----------------+------------+
 | nanoseconds |     seconds     | identifier |
 |    0..3     |      4..10      |   11..15   |
 +-------------+-----------------+------------+
 ```
+
+The representational structure of the CSUUID, however, is itself sortable, as are the objects themselves.
+
+```plain
+.00.0e.d9.eb.-.7e.05.-.08.ae.-.f2.9c.-.df.18.10.1c.4a.dc.
+^      seconds       ^  nanoseconds  ^identifier/entropy^
+```
+
 
 ## Installation
 

@@ -46,6 +46,13 @@ require "crystal/spin_lock"
 # +-------------+-----------------+------------+
 # ```
 #
+# The representational structure of the CSUUID, however, is itself sortable, as are the objects themselves.
+#
+# ```plain
+# .00.0e.d9.eb.-.7e.05.-.08.ae.-.f2.9c.-.df.18.10.1c.4a.dc.
+# ^      seconds       ^  nanoseconds  ^identifier/entropy^
+# ```
+#
 struct CSUUID
   # CSUUID will work with any source of entropy that inherits from Random.
   # It defaults to `Random::ISAAC`.
