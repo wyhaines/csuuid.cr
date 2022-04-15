@@ -27,30 +27,6 @@ The current implementation chose option #2, as it is less work to generate a UUI
 +-------------+-----------------+------------+
 ```
 
-## Benchmarks
-
-CSUUID currently benchmarks to be much faster than the standard Crystal UUID class, as of Crystal 1.1.1. See below for some benchmarks.
-
-* Dell XPS 15 - Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz   2.40 GHz - 32GB RAM
-* Ubuntu 20.04 on WSL1
-* Crystal 1.1.1; LLVM: 10.0.1
-```
-CSUUID.new -- generate random, chronologically sortable UUID   2.78M (359.78ns) (± 2.41%)  48.0B/op        fastest
-                         UUID.random -- generate random UUID   1.07M (937.03ns) (± 2.27%)   0.0B/op   2.60× slower
-CSUUID.unique -- generate 100 guaranteed unique, sortable IDs  27.48k ( 36.39µs) (± 2.37%)  4.7kB/op        fastest
-                        UUID.new -- generate 100 random UUIDs  10.69k ( 93.58µs) (± 2.06%)   0.0B/op   2.57× slower
-```
-
-* Alienware Aurora R11 - Intel(R) Core(TM) i9-10900KF CPU @ 3.70GHz   3.70 GHz - 128GB RAM
-* Ubuntu 20.04 on WSL2
-* Crystal 1.1.1; LLVM: 10.0.1
-```
-CSUUID.new -- generate random, chronologically sortable UUID   6.09M (164.22ns) (± 1.21%)  48.0B/op        fastest
-                         UUID.random -- generate random UUID   3.41M (292.86ns) (± 2.46%)   0.0B/op   1.78× slower
-CSUUID.unique -- generate 100 guaranteed unique, sortable IDs  58.49k ( 17.10µs) (± 1.51%)  4.69kB/op        fastest
-                        UUID.new -- generate 100 random UUIDs  34.58k ( 28.92µs) (± 1.02%)    0.0B/op   1.69× slower
-```
-
 ## Installation
 
 1. Add the dependency to your `shard.yml`:

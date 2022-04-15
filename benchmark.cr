@@ -1,6 +1,8 @@
 require "./src/csuuid"
 require "benchmark"
 
+CSUUID.prng = Random::PCG32.new
+
 # Run this:
 #
 # `crystal run -p -s -t --release benchmark.cr`

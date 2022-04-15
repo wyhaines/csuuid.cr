@@ -130,7 +130,7 @@ struct CSUUID
   # Create a new CSUUID from the given identifier/entropy value alone.
   def initialize(identifier : Slice(UInt8) | Nil = nil)
     identifier ||= CSUUID.prng.random_bytes(6)
-    t = Time.local
+    t = Time.utc
     initialize_impl(t.internal_seconds, t.internal_nanoseconds, identifier)
   end
 
