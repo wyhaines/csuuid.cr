@@ -21,5 +21,7 @@ jobs:
       run: shards install
     - name: Run tests
       run: crystal spec -t -s
+    - name: Format Linting
+      run: crystal tool format --check
     - name: Run Ameba
       run: bin/ameba

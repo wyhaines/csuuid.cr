@@ -1,8 +1,10 @@
-# CSUUID
+[![CSUUID.cr CI](https://github.com/wyhaines/csuuid.cr/actions/workflows/ci.yml/badge.svg)](https://github.com/wyhaines/csuuid.cr/actions/workflows/ci.yml)
+[![CSUUID.cr Build Docs](https://github.com/wyhaines/csuuid.cr/actions/workflows/build_docs.yml/badge.svg)](https://github.com/wyhaines/csuuid.cr/actions/workflows/build_docs.yml)
 
-![CSUUID CI](https://img.shields.io/github/workflow/status/wyhaines/CSUUID.cr/CSUUID.cr%20CI?style=for-the-badge&logo=GitHub)
 [![GitHub release](https://img.shields.io/github/release/wyhaines/CSUUID.cr.svg?style=for-the-badge)](https://github.com/wyhaines/CSUUID.cr/releases)
 ![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/wyhaines/CSUUID.cr/latest?style=for-the-badge)
+
+# CSUUID
 
 This struct wraps up a UUID that encodes a timestamp measured as seconds from the epoch `(0001-01-01 00:00:00.0 UTC)` observed at the location where the timestamp was generated, plus nanoseconds in the current second, plus 6 bytes for unique identification of the source -- this could be an IPV4 address with two null bytes, a MAC address, or some other sequence that will fit in 6 bytes.
   

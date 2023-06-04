@@ -77,7 +77,7 @@ describe CSUUID do
   it "accurately returns the timestamp encoded within the UUID" do
     uuid = CSUUID.new(ParseDate.parse("2020/07/29 09:15:37"))
     uuid.timestamp.should eq(
-      ParseDate.parse("2020/07/29 09:15:37").not_nil!.in(Time::Location.local)
+      ParseDate.parse("2020/07/29 09:15:37").try &.in(Time::Location.local)
     )
   end
 
