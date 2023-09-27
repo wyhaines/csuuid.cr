@@ -1,6 +1,7 @@
 name: CSUUID.cr Build Docs
 
 on:
+  workflow_dispatch:
   schedule:
     - cron:  '0 3 * * *'
   push:
