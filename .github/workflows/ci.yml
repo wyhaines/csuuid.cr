@@ -11,12 +11,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    container:
-      image: crystallang/crystal
-
     steps:
-    - uses: actions/checkout@v2
+    - name: Download source
+      uses: actions/checkout@v2
+    - name: Install Crystal
+      uses: crystal-lang/install-crystal@v1
     - name: Install dependencies
       run: shards install
     - name: Run tests

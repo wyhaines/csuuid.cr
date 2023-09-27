@@ -10,17 +10,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    container:
-      image: crystallang/crystal
-
+jobs:
+  build:
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - name: Download source
+      uses: actions/checkout@v2
+    - name: Install Crystal
+      uses: crystal-lang/install-crystal@v1
     - name: Install dependencies
       run: shards install
     - name: Build docs
       run: crystal docs
-    - name: Deploy
-      uses: peaceiris/actions-gh-pages@v3
+    - name: Deploy docs
+      uses: JamesIves/github-pages-deploy-action@3.7.1
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH: gh-pages
+        FOLDER: docs
+        SINGLE_COMMIT: true
