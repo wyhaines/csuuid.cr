@@ -2,7 +2,7 @@ require "./version"
 require "uuid"
 require "time-ext"
 require "random/isaac"
-require "crystal/spin_lock"
+require "mutex"
 
 # This struct wraps up a UUID that encodes a timestamp measured as seconds
 # from the epoch (0001-01-01 00:00:00.0 UTC) observed at the location where
@@ -57,7 +57,7 @@ struct CSUUID
   # CSUUID will work with any source of entropy that inherits from Random.
   # It defaults to `Random::ISAAC`.
   class_property prng : Random = Random::ISAAC.new
-  @@mutex = Crystal::SpinLock.new
+  @@mutex = Mutex.new(protection: :reentrant)
   @@unique_identifier : Slice(UInt8) = Slice(UInt8).new(6, 0)
   @@unique_seconds_and_nanoseconds : Tuple(Int64, Int32) = {0_i64, 0_i32}
 
@@ -70,7 +70,7 @@ struct CSUUID
 
   # Generate a guaranteed unique (for this process) CSUUID.
   def self.unique
-    @@mutex.sync do
+    @@mutex.synchronize do
       t = Time.local
       if t.internal_nanoseconds == @@unique_seconds_and_nanoseconds[1] &&
          t.internal_seconds == @@unique_seconds_and_nanoseconds[0]
@@ -153,7 +153,7 @@ struct CSUUID
 
     IO::ByteFormat::BigEndian.encode(seconds, @bytes[2, 8])
     IO::ByteFormat::BigEndian.encode(nanoseconds, @bytes[0, 4])
-    @@mutex.sync do
+    @@mutex.synchronize do
       # Random::ISAAC.random_bytes doesn't appear to be threadsafe.
       # It sometimes dies ugly in multithreaded code, so we need a
       # lock in this one tiny little space to avoid that.
