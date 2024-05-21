@@ -58,6 +58,7 @@ struct CSUUID
   # It defaults to `Random::ISAAC`.
   class_property prng : Random = Random::ISAAC.new
   @@mutex = Crystal::SpinLock.new
+  @@isaac_mutex = Crystal::SpinLock.new
   @@unique_identifier : Slice(UInt8) = Slice(UInt8).new(6, 0)
   @@unique_seconds_and_nanoseconds : Tuple(Int64, Int32) = {0_i64, 0_i32}
 
@@ -153,11 +154,11 @@ struct CSUUID
 
     IO::ByteFormat::BigEndian.encode(seconds, @bytes[2, 8])
     IO::ByteFormat::BigEndian.encode(nanoseconds, @bytes[0, 4])
-    @@mutex.sync do
+    @@isaac_mutex.sync do
       # Random::ISAAC.random_bytes doesn't appear to be threadsafe.
       # It sometimes dies ugly in multithreaded code, so we need a
       # lock in this one tiny little space to avoid that.
-      # TODO: Check if this is still the case post Crystal 1.4.0,
+      # Check if this is still the case post Crystal 1.4.0,
       # and if it is, fix Crypt::ISAAC and send in a PR.
       @bytes[10, 6].copy_from(id || CSUUID.prng.random_bytes(6))
     end
@@ -201,16 +202,16 @@ struct CSUUID
 
   # Compare two CSUUID objects, returning -1 if the first is less than the second,
   # 0 if they are equal, and 1 if the first is greater than the second.
-  def <=>(val : CSUUID)
+  def <=>(other : CSUUID)
     s, ns = seconds_and_nanoseconds
-    s_val, ns_val = val.seconds_and_nanoseconds
+    s_val, ns_val = other.seconds_and_nanoseconds
     r = s <=> s_val
     return r unless r == 0
 
     r = ns <=> ns_val
     return r unless r == 0
 
-    to_s <=> val.to_s
+    to_s <=> other.to_s
   end
 
   # Returns `true` if `self` is less than *other*.
