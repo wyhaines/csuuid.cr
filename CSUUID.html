@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.12.2">
+<meta name="crystal_docs.project_version" content="main">
+<meta name="crystal_docs.project_name" content="csuuid">
+
+
+
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/doc.js"></script>
+
+  <meta name="repository-name" content="csuuid">
+  <title>CSUUID - csuuid main</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="index.html">
+          csuuid
+        </a>
+      </h1>
+
+      <span class="project-version">
+        main
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class=" current" data-id="csuuid/CSUUID" data-name="csuuid">
+      <a href="CSUUID.html">CSUUID</a>
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">struct</span> CSUUID
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="CSUUID.html">CSUUID</a></li><li class="superclass">Struct</li><li class="superclass">Value</li><li class="superclass">Object</li></ul>
+
+
+
+
+  <h2>
+    <a id="overview" class="anchor" href="#overview">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Overview
+  </h2>
+
+  <p>This struct wraps up a UUID that encodes a timestamp measured as seconds
+from the epoch (0001-01-01 00:00:00.0 UTC) observed at the location where
+the timestamp was generated, plus nanoseconds in the current second, plus
+6 bytes for unique identification of the source -- this could be an
+IPV4 address with two null bytes, a MAC address, or some other sequence
+that will fit in 6 bytes.</p>
+<p>Nanoseconds will fit in an Int32 (4 bytes), but seconds since the epoch
+will not. The current number of seconds leaks a short distance into a
+5th byte, meaning that in this class, it has to be represented by an
+Int64. This is problematic because a UID allows for 16 bytes, so the
+use of 8 for seconds and 4 for nanoseconds leaves only 4 bytes for system
+identification. It also leaves three bytes in the UUID as zeros because 8
+bytes for seconds is a lot of seconds.</p>
+<p>One solution is to combine the seconds and the nanoseconds into a single
+Int64 number. This requires math operations to do efficiently:
+(seconds * 1000000000) + nanoseconds
+and then more math to extract the original numbers in order to reconstruct
+the original timestamp. This leaves 8 bytes for identification or other
+uniqueness information, which is lovely, but the math requirement is less
+lovely.</p>
+<p>The other options is to truncate 2 bytes off of the seconds, storing
+6 bytes of seconds data. This leaves 6 bytes for identification.</p>
+<p>The current implementation chose option #2, as it is less work to generate
+a UUID if math is not involved.</p>
+<p>Thus, the byte structure of a CSUUID is as follows:</p>
+<p>An argument could be made for decreasing the nanosecond resolution to something
+more granular, and adding those bytes to the identifier/entropy portion of the
+ID, but as designed this structure allows for very precise sorting of the IDs.</p>
+<pre><code class="language-plain">+-------------+-----------------+------------+
+| nanoseconds |     seconds     | identifier |
+|    0..3     |      4..10      |   11..15   |
++-------------+-----------------+------------+</code></pre>
+<p>The representational structure of the CSUUID, however, is itself sortable, as are the objects themselves.</p>
+<pre><code class="language-plain">.00.0e.d9.eb.-.7e.05.-.08.ae.-.f2.9c.-.df.18.10.1c.4a.dc.
+^      seconds       ^  nanoseconds  ^identifier/entropy^</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      <a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L56" target="_blank">
+        csuuid.cr
+      </a>
+    
+    <br/>
+  
+    
+      <a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/version.cr#L1" target="_blank">
+        version.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+  
+    <h2>
+      <a id="constant-summary" class="anchor" href="#constant-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+      Constant Summary
+    </h2>
+  
+  <dl>
+    
+      <dt class="entry-const" id="VERSION">
+        <strong>VERSION</strong> = <code><span class="s">&quot;1.0.1&quot;</span></code>
+      </dt>
+      
+    
+  </dl>
+
+
+
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28seconds%3AInt64%2Cnanoseconds%3AInt32%2Cidentifier%3ASlice%28UInt8%29%7CString%7CNil%3Dnil%29-class-method" class="signature"><strong>.new</strong>(seconds : Int64, nanoseconds : Int32, identifier : Slice(UInt8) | String | Nil = <span class="n">nil</span>)</a>
+        
+          <div class="summary"><p>Create a new CSUUID from the given seconds, nanoseconds, and optional identifier/entropy.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#new%28uuid%3AString%29-class-method" class="signature"><strong>.new</strong>(uuid : String)</a>
+        
+          <div class="summary"><p>Create a new CSUUID from the string representation of a UUID, with or without dashes.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#new%28uuid%3AUUID%7CCSUUID%29-class-method" class="signature"><strong>.new</strong>(uuid : UUID | CSUUID)</a>
+        
+          <div class="summary"><p>Create a new CSUUID from a given UUID or CSUUID object.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#new%28timestamp%3ATime%2Cidentifier%3ASlice%28UInt8%29%7CString%7CNil%3Dnil%29-class-method" class="signature"><strong>.new</strong>(timestamp : Time, identifier : Slice(UInt8) | String | Nil = <span class="n">nil</span>)</a>
+        
+          <div class="summary"><p>Create a new CSUUID from the given Time object and optional identifier/entropy.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#new%28identifier%3ASlice%28UInt8%29%7CNil%3Dnil%29-class-method" class="signature"><strong>.new</strong>(identifier : Slice(UInt8) | Nil = <span class="n">nil</span>)</a>
+        
+          <div class="summary"><p>Create a new CSUUID from the given identifier/entropy value alone.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+  <h2>
+    <a id="class-method-summary" class="anchor" href="#class-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Class Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#generate%28count%29-class-method" class="signature"><strong>.generate</strong>(count)</a>
+        
+          <div class="summary"><p>Generate a sequence of CSUUIDS of the requested <em>count</em> length.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#prng%3ARandom-class-method" class="signature"><strong>.prng</strong> : Random</a>
+        
+          <div class="summary"><p>CSUUID will work with any source of entropy that inherits from Random.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#prng%3D%28prng%3ARandom%29-class-method" class="signature"><strong>.prng=</strong>(prng : Random)</a>
+        
+          <div class="summary"><p>CSUUID will work with any source of entropy that inherits from Random.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#unique-class-method" class="signature"><strong>.unique</strong></a>
+        
+          <div class="summary"><p>Generate a guaranteed unique (for this process) CSUUID.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#%3C%28other%3ACSUUID%29%3ABool-instance-method" class="signature"><strong>#<</strong>(other : CSUUID) : Bool</a>
+        
+          <div class="summary"><p>Returns <code>true</code> if <code>self</code> is less than <em>other</em>.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#%3C%3D%28other%3ACSUUID%29%3ABool-instance-method" class="signature"><strong>#<=</strong>(other : CSUUID) : Bool</a>
+        
+          <div class="summary"><p>Returns <code>true</code> if <code>self</code> is less than or equal to <em>other</em>.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#%3C%3D%3E%28other%3ACSUUID%29-instance-method" class="signature"><strong>#<=></strong>(other : CSUUID)</a>
+        
+          <div class="summary"><p>Compare two CSUUID objects, returning -1 if the first is less than the second, 0 if they are equal, and 1 if the first is greater than the second.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#%3E%28other%3ACSUUID%29%3ABool-instance-method" class="signature"><strong>#></strong>(other : CSUUID) : Bool</a>
+        
+          <div class="summary"><p>Returns <code>true</code> if <code>self</code> is greater than <em>other</em>.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#%3E%3D%28other%3ACSUUID%29%3ABool-instance-method" class="signature"><strong>#>=</strong>(other : CSUUID) : Bool</a>
+        
+          <div class="summary"><p>Returns <code>true</code> if <code>self</code> is greater than or equal to <em>other</em>.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#bytes%3ASlice%28UInt8%29-instance-method" class="signature"><strong>#bytes</strong> : Slice(UInt8)</a>
+        
+          <div class="summary"><p>A getter to allow access to the raw byte buffer for the CSUUID.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#seconds_and_nanoseconds%3ATuple%28Int64%2CInt32%29-instance-method" class="signature"><strong>#seconds_and_nanoseconds</strong> : Tuple(Int64, Int32)</a>
+        
+          <div class="summary"><p>This returns a tuple containing the seconds since the epoch as well as the nanoseconds in the current second for the UUID.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#timestamp%3ATime-instance-method" class="signature"><strong>#timestamp</strong> : Time</a>
+        
+          <div class="summary"><p>Return a Time object representing the timestamp encoded into the UUID as local time.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#to_s%28io%3AIO%29%3ANil-instance-method" class="signature"><strong>#to_s</strong>(io : IO) : Nil</a>
+        
+          <div class="summary"><p>Return the String representation of the UUID.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#utc%3ATime-instance-method" class="signature"><strong>#utc</strong> : Time</a>
+        
+          <div class="summary"><p>Return a Time object representing the timestamp encoded into the UUID as UTC time.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(seconds:Int64,nanoseconds:Int32,identifier:Slice(UInt8)|String|Nil=nil)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(seconds : Int64, nanoseconds : Int32, identifier : Slice(UInt8) | String | Nil = <span class="n">nil</span>)
+
+        <a class="method-permalink" href="#new%28seconds%3AInt64%2Cnanoseconds%3AInt32%2Cidentifier%3ASlice%28UInt8%29%7CString%7CNil%3Dnil%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Create a new CSUUID from the given seconds, nanoseconds, and optional identifier/entropy.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L129" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="new(uuid:String)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(uuid : String)
+
+        <a class="method-permalink" href="#new%28uuid%3AString%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Create a new CSUUID from the string representation of a UUID, with or without dashes.
+If the string represents a CSUUID, the new CSUUID will be a copy of the original. If
+the string represents a traditional UUID, the new CSUUID will have a different byte
+order from the original.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L114" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="new(uuid:UUID|CSUUID)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(uuid : UUID | <a href="CSUUID.html">CSUUID</a>)
+
+        <a class="method-permalink" href="#new%28uuid%3AUUID%7CCSUUID%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Create a new CSUUID from a given UUID or CSUUID object. If the object is a CSUUID,
+the new CSUUID will be a copy of the original. If the object is a traditional UUID,
+the new CSUUID will have a different byte order from the original.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L124" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="new(timestamp:Time,identifier:Slice(UInt8)|String|Nil=nil)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(timestamp : Time, identifier : Slice(UInt8) | String | Nil = <span class="n">nil</span>)
+
+        <a class="method-permalink" href="#new%28timestamp%3ATime%2Cidentifier%3ASlice%28UInt8%29%7CString%7CNil%3Dnil%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Create a new CSUUID from the given Time object and optional identifier/entropy.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L134" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="new(identifier:Slice(UInt8)|Nil=nil)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(identifier : Slice(UInt8) | Nil = <span class="n">nil</span>)
+
+        <a class="method-permalink" href="#new%28identifier%3ASlice%28UInt8%29%7CNil%3Dnil%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Create a new CSUUID from the given identifier/entropy value alone.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L139" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+  <h2>
+    <a id="class-method-detail" class="anchor" href="#class-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Class Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="generate(count)-class-method">
+      <div class="signature">
+        
+        def self.<strong>generate</strong>(count)
+
+        <a class="method-permalink" href="#generate%28count%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Generate a sequence of CSUUIDS of the requested <em>count</em> length.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L93" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="prng:Random-class-method">
+      <div class="signature">
+        
+        def self.<strong>prng</strong> : Random
+
+        <a class="method-permalink" href="#prng%3ARandom-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>CSUUID will work with any source of entropy that inherits from Random.
+It defaults to <code>Random::ISAAC</code>.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L59" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="prng=(prng:Random)-class-method">
+      <div class="signature">
+        
+        def self.<strong>prng=</strong>(prng : Random)
+
+        <a class="method-permalink" href="#prng%3D%28prng%3ARandom%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>CSUUID will work with any source of entropy that inherits from Random.
+It defaults to <code>Random::ISAAC</code>.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L59" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="unique-class-method">
+      <div class="signature">
+        
+        def self.<strong>unique</strong>
+
+        <a class="method-permalink" href="#unique-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Generate a guaranteed unique (for this process) CSUUID.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L73" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="&lt;(other:CSUUID):Bool-instance-method">
+      <div class="signature">
+        
+        def <strong><</strong>(other : <a href="CSUUID.html">CSUUID</a>) : Bool
+
+        <a class="method-permalink" href="#%3C%28other%3ACSUUID%29%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns <code>true</code> if <code>self</code> is less than <em>other</em>.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L218" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="&lt;=(other:CSUUID):Bool-instance-method">
+      <div class="signature">
+        
+        def <strong><=</strong>(other : <a href="CSUUID.html">CSUUID</a>) : Bool
+
+        <a class="method-permalink" href="#%3C%3D%28other%3ACSUUID%29%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns <code>true</code> if <code>self</code> is less than or equal to <em>other</em>.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L228" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="&lt;=&gt;(other:CSUUID)-instance-method">
+      <div class="signature">
+        
+        def <strong><=></strong>(other : <a href="CSUUID.html">CSUUID</a>)
+
+        <a class="method-permalink" href="#%3C%3D%3E%28other%3ACSUUID%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Compare two CSUUID objects, returning -1 if the first is less than the second,
+0 if they are equal, and 1 if the first is greater than the second.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L205" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="&gt;(other:CSUUID):Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>></strong>(other : <a href="CSUUID.html">CSUUID</a>) : Bool
+
+        <a class="method-permalink" href="#%3E%28other%3ACSUUID%29%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns <code>true</code> if <code>self</code> is greater than <em>other</em>.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L223" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="&gt;=(other:CSUUID):Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>>=</strong>(other : <a href="CSUUID.html">CSUUID</a>) : Bool
+
+        <a class="method-permalink" href="#%3E%3D%28other%3ACSUUID%29%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns <code>true</code> if <code>self</code> is greater than or equal to <em>other</em>.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L233" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="bytes:Slice(UInt8)-instance-method">
+      <div class="signature">
+        
+        def <strong>bytes</strong> : Slice(UInt8)
+
+        <a class="method-permalink" href="#bytes%3ASlice%28UInt8%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>A getter to allow access to the raw byte buffer for the CSUUID.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L66" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="seconds_and_nanoseconds:Tuple(Int64,Int32)-instance-method">
+      <div class="signature">
+        
+        def <strong>seconds_and_nanoseconds</strong> : Tuple(Int64, Int32)
+
+        <a class="method-permalink" href="#seconds_and_nanoseconds%3ATuple%28Int64%2CInt32%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>This returns a tuple containing the seconds since the epoch as well
+as the nanoseconds in the current second for the UUID.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L169" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="timestamp:Time-instance-method">
+      <div class="signature">
+        
+        def <strong>timestamp</strong> : Time
+
+        <a class="method-permalink" href="#timestamp%3ATime-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Return a Time object representing the timestamp encoded into the UUID as local time.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L182" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="to_s(io:IO):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>to_s</strong>(io : IO) : Nil
+
+        <a class="method-permalink" href="#to_s%28io%3AIO%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Return the String representation of the UUID.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L198" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="utc:Time-instance-method">
+      <div class="signature">
+        
+        def <strong>utc</strong> : Time
+
+        <a class="method-permalink" href="#utc%3ATime-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Return a Time object representing the timestamp encoded into the UUID as UTC time.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/wyhaines/csuuid.cr/blob/4cb8656a9214aede9c1840cad4acf8e55e658f2f/src/csuuid.cr#L190" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+</div>
+
+</body>
+</html>

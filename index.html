@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.12.2">
+<meta name="crystal_docs.project_version" content="main">
+<meta name="crystal_docs.project_name" content="csuuid">
+
+
+
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/doc.js"></script>
+
+  <meta name="repository-name" content="csuuid">
+  <title>csuuid main</title>
+  <script type="text/javascript">
+  CrystalDocs.base_path = "";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="index.html">
+          csuuid
+        </a>
+      </h1>
+
+      <span class="project-version">
+        main
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class=" " data-id="csuuid/CSUUID" data-name="csuuid">
+      <a href="CSUUID.html">CSUUID</a>
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<p><a href="https://github.com/wyhaines/csuuid.cr/actions/workflows/ci.yml"><img src="https://github.com/wyhaines/csuuid.cr/actions/workflows/ci.yml/badge.svg" alt="CSUUID.cr CI" /></a>
+<a href="https://github.com/wyhaines/csuuid.cr/actions/workflows/build_docs.yml"><img src="https://github.com/wyhaines/csuuid.cr/actions/workflows/build_docs.yml/badge.svg" alt="CSUUID.cr Build Docs" /></a></p>
+<p><a href="https://github.com/wyhaines/CSUUID.cr/releases"><img src="https://img.shields.io/github/release/wyhaines/CSUUID.cr.svg?style=for-the-badge" alt="GitHub release" /></a>
+<img src="https://img.shields.io/github/commits-since/wyhaines/CSUUID.cr/latest?style=for-the-badge" alt="GitHub commits since latest release (by SemVer)" /></p>
+<h1><a id="csuuid" class="anchor" href="#csuuid">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>CSUUID</h1>
+<p>This struct wraps up a UUID that encodes a timestamp measured as seconds from the epoch <code>(0001-01-01 00:00:00.0 UTC)</code> observed at the location where the timestamp was generated, plus nanoseconds in the current second, plus 6 bytes for unique identification of the source -- this could be an IPV4 address with two null bytes, a MAC address, or some other sequence that will fit in 6 bytes.</p>
+<p>Nanoseconds will fit in an Int32 (4 bytes), but seconds since the epoch will not. The current number of seconds leaks a short distance into a 5th byte, meaning that in this class, it has to be represented by an Int64. This is problematic because a UID allows for 16 bytes, so the use of 8 for seconds and 4 for nanoseconds leaves only 4 bytes for system identification. It also leaves three bytes in the UUID as zeros because 8 bytes for seconds is a lot of seconds.</p>
+<p>One solution is to combine the seconds and the nanoseconds into a single Int64 number. This requires math operations to do efficiently:</p>
+<pre><code class="language-crystal">(seconds <span class="o">*</span> <span class="n">1000000000</span>) <span class="o">+</span> nanoseconds</code></pre>
+<p>and then more math to extract the original numbers in order to reconstruct the original timestamp. This leaves 8 bytes for identification or other uniqueness information, which is lovely, but the math requirement is less lovely.</p>
+<p>The other options is to truncate 2 bytes off of the seconds, storing 6 bytes of seconds data. This leaves 6 bytes for identification.</p>
+<p>The current implementation chose option #2, as it is less work to generate a UUID if math is not involved.</p>
+<p>The byte structure of the CSUUID is:</p>
+<pre><code class="language-crystal">+-------------+-----------------+------------+
+| nanoseconds |     seconds     | identifier |
+|    0..3     |      4..10      |   11..15   |
++-------------+-----------------+------------+</code></pre>
+<p>The representational structure of the CSUUID, however, is itself sortable, as are the objects themselves.</p>
+<pre><code class="language-plain">.00.0e.d9.eb.-.7e.05.-.08.ae.-.f2.9c.-.df.18.10.1c.4a.dc.
+^      seconds       ^  nanoseconds  ^identifier/entropy^</code></pre>
+<h2><a id="installation" class="anchor" href="#installation">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Installation</h2>
+<ol>
+<li>
+<p>Add the dependency to your <code>shard.yml</code>:</p>
+<pre><code class="language-yaml">dependencies:
+  csuuid:
+    github: wyhaines/csuuid.cr</code></pre>
+</li>
+<li>
+<p>Run <code>shards install</code></p>
+</li>
+</ol>
+<h2><a id="usage" class="anchor" href="#usage">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Usage</h2>
+<pre><code class="language-crystal"><span class="k">require</span> <span class="s">&quot;csuuid&quot;</span>
+
+uuid <span class="o">=</span> <span class="t">CSUUID</span>.new
+
+uuid <span class="o">=</span> <span class="t">CSUUID</span>.new(seconds: <span class="n">9223372036</span>, nanoseconds: <span class="n">729262400</span>)
+
+uuid <span class="o">=</span> <span class="t">CSUUID</span>.new(identifier: <span class="t">Random</span>.new.random_bytes(<span class="n">6</span>))
+
+dt <span class="o">=</span> <span class="t">ParseDate</span>.parse(<span class="s">&quot;2020/07/29 09:15:37&quot;</span>)
+uuid <span class="o">=</span> <span class="t">CSUUID</span>.new(dt)</code></pre>
+<h2><a id="api-docs" class="anchor" href="#api-docs">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>API Docs</h2>
+<p>https://wyhaines.github.io/csuuid.cr/</p>
+<h2><a id="contributing" class="anchor" href="#contributing">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Contributing</h2>
+<ol>
+<li>Fork it (<a href="https://github.com/wyhaines/csuuid.cr/fork">https://github.com/wyhaines/csuuid.cr/fork</a>)</li>
+<li>Create your feature branch (<code>git checkout -b my-new-feature</code>)</li>
+<li>Commit your changes (<code>git commit -am 'Add some feature'</code>)</li>
+<li>Push to the branch (<code>git push origin my-new-feature</code>)</li>
+<li>Create a new Pull Request</li>
+</ol>
+<h2><a id="contributors" class="anchor" href="#contributors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Contributors</h2>
+<ul>
+<li><a href="https://github.com/wyhaines">Kirk Haines</a> - creator and maintainer</li>
+</ul>
+<p><img src="https://img.shields.io/github/languages/code-size/wyhaines/CSUUID.cr?style=for-the-badge" alt="GitHub code size in bytes" />
+<img src="https://img.shields.io/github/issues/wyhaines/CSUUID.cr?style=for-the-badge" alt="GitHub issues" /></p>
+</div>
+</body>
+</html>
