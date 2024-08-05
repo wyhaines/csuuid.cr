@@ -139,4 +139,16 @@ describe CSUUID do
     uuid1.should_not eq uuid2
     uuid2.should be > uuid1
   end
+
+  it "can benchmark against the system UUIDs" do
+    CSUUID.prng = Random::PCG32.new
+
+    puts
+
+    Benchmark.ips do |benchmark|
+      benchmark.report("CSUUID.unique") { CSUUID.unique }
+      benchmark.report("CSUUID.new") { CSUUID.new }
+      benchmark.report("UUID.v7") { UUID.v7 }
+    end
+  end
 end
